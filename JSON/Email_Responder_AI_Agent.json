@@ -1,0 +1,284 @@
+{
+  "name": "Email Responder AI Agent",
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyHour"
+            }
+          ]
+        },
+        "simple": false,
+        "filters": {},
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmailTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -300,
+        0
+      ],
+      "id": "b3acb816-3f9f-4566-bf98-52766f0dbfc4",
+      "name": "Gmail Trigger",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "eqwrCiq1w1PZ9ltp",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "inputText": "={{ $json.text }}",
+        "categories": {
+          "categories": [
+            {
+              "category": "Sponsorship",
+              "description": "Description: Sponsorship emails are messages sent by organizations or individuals seeking financial, in-kind, or promotional support for an event, initiative, or project. These emails may also come from companies offering sponsorship opportunities. They typically contain information about sponsorship benefits, tiers, pricing, and promotional plans.  Common Characteristics:  Subject lines with terms like “Sponsorship Proposal,” “Partner with Us,” “Exclusive Sponsorship Opportunity”  Mentions of event details, audience reach, and sponsorship tiers (e.g., Gold, Silver, Platinum)  Call-to-action phrases like “Join us as a sponsor” or “Let's discuss partnership opportunities”  Contact details for further discussions  Example Keywords for Classification:  Seeking Sponsorship: sponsorship proposal, partnership opportunity, sponsor our event, funding request, sponsorship benefits, event sponsorship  Offering Sponsorship: exclusive sponsorship package, brand visibility, marketing partnership, corporate sponsorship, advertise with us, official sponsor"
+            },
+            {
+              "category": "High Priority",
+              "description": "Description: High-priority emails require urgent attention due to their critical nature. These emails may involve time-sensitive requests, escalations, emergency notifications, or important business decisions. They often come from executives, clients, or system alerts.  Common Characteristics:  Subject lines with urgent indicators like \"Immediate Action Required,\" \"High Priority,\" \"Response Needed ASAP,\" or \"Critical Issue Alert.\"  Sent from high-level executives, key clients, or automated alert systems.  Contain deadlines or a request for immediate action.  May include warning messages, system failures, legal notices, or crisis communications.  Example Keywords for Classification:  Urgent Requests: immediate response, urgent approval needed, action required, escalate, respond ASAP  System Alerts: critical error, server down, security breach, payment failure, system outage  Client/Executive Communications: CEO request, investor meeting, VIP client request, contract deadline"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.textClassifier",
+      "typeVersion": 1,
+      "position": [
+        -80,
+        0
+      ],
+      "id": "b5e7a44b-737f-4a91-85c2-3cf0ac02f72c",
+      "name": "Text Classifier"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4o-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        -160,
+        180
+      ],
+      "id": "92535809-6d2a-4460-8c07-a86dee495b9f",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "UCTLgEU9UUeQchmn",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "GPT-4O-MINI"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=Instruction to LLM:\nYou are an AI assistant responding to a sponsorship inquiry. The user’s base sponsorship cost is $3,000, and they want to highlight sponsorship benefits while encouraging further discussion. Generate a professional, polite, and engaging response that:\n\nAcknowledges the sender’s interest. your job is respond to email\n\nOutlines the base sponsorship cost and benefits.\n\nMentions the possibility of custom sponsorship options.\n\nEncourages further discussion or a meeting.\n\nKeeps a neutral and adaptable tone, without specifying any particular event.\n\nGenerated Response:\nSubject: Re: Sponsorship Opportunity Inquiry\n\nDear [Sender’s Name],\n\nThank you for reaching out and expressing interest in sponsoring our event. We’re excited about the possibility of partnering with [Company Name]!\n\nOur base sponsorship package starts at $3,000 and includes several key benefits to maximize your brand exposure and engagement:\n✅ Brand Visibility – Logo placement on banners, digital materials, and social media promotions.\n✅ Speaking Opportunity (if applicable) – A chance to showcase your expertise in front of an engaged audience.\n✅ Booth or Demo Space – Direct interaction with attendees to promote your products/services.\n✅ Social Media & Marketing Exposure – Recognition across our event’s platforms and communications.\n\nWe also offer custom sponsorship options to tailor the partnership to your brand’s goals. I’d love to discuss this further and find the best fit for your company. Let me know a convenient time for a quick call or meeting.\n\nLooking forward to your response!\n\ni Want you to respond in two part email subject and email body\n\nThe email is respond to : {{ $json.text }}",
+              "role": "system"
+            }
+          ]
+        },
+        "jsonOutput": true,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [
+        280,
+        -100
+      ],
+      "id": "ee825e53-6695-489d-8a07-2e62cae153c7",
+      "name": "OpenAI",
+      "credentials": {
+        "openAiApi": {
+          "id": "UCTLgEU9UUeQchmn",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "draft",
+        "subject": "={{ $json.message.content.subject }}",
+        "message": "={{ $json.message.content.body }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        640,
+        -100
+      ],
+      "id": "ef93942e-2e5b-4e67-8e21-cf0cd41b540d",
+      "name": "Gmail",
+      "webhookId": "8afeedbb-7101-4e96-915c-966c98c4cf78",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "eqwrCiq1w1PZ9ltp",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "GPT-4O-MINI"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=You are an AI assistant handling high-priority emails that require urgent attention and immediate action. Your response should be:\n\nClear and Direct: Get to the point quickly without unnecessary details.\n\nProfessional and Polite: Maintain a formal tone while emphasizing urgency.\n\nAction-Oriented: Provide the necessary next steps, deadlines, or required actions.\n\nConcise but Comprehensive: Include only the most critical information needed to address the request.\n\nConfirmation-Based: Ask for acknowledgment to ensure the recipient is aware of the urgency.\n\nResponse Structure:\nAcknowledge the urgency and confirm receipt of the request.\n\nRestate the key requirements (e.g., report details, deadline, or requested action).\n\nProvide status update if applicable (e.g., work in progress, estimated completion time).\n\n i want you to respond in two part email subject and email body\n \nRequest confirmation once the task is completed or if any clarification is needed.  {{ $json.text }}",
+              "role": "system"
+            }
+          ]
+        },
+        "jsonOutput": true,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [
+        280,
+        100
+      ],
+      "id": "0c41ea5b-f31e-43b0-b018-94ba764e021d",
+      "name": "OpenAI1",
+      "credentials": {
+        "openAiApi": {
+          "id": "UCTLgEU9UUeQchmn",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "draft",
+        "subject": "={{ $('Text Classifier').item.json.headers.subject }}",
+        "message": "={{ $('Text Classifier').item.json.text }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        640,
+        100
+      ],
+      "id": "12ae8ea5-9f55-4aed-9b55-b21bba67a62f",
+      "name": "Gmail1",
+      "webhookId": "91d16bae-17c1-4477-8c62-4d5b19cb51f2",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "eqwrCiq1w1PZ9ltp",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        160,
+        20
+      ],
+      "typeVersion": 1,
+      "id": "94507616-e05f-41eb-93dd-7ec0bfe9eab3",
+      "name": "Sticky Note"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Gmail Trigger": {
+      "main": [
+        [
+          {
+            "node": "Text Classifier",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Text Classifier",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Text Classifier": {
+      "main": [
+        [
+          {
+            "node": "OpenAI",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "OpenAI1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI": {
+      "main": [
+        [
+          {
+            "node": "Gmail",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI1": {
+      "main": [
+        [
+          {
+            "node": "Gmail1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "974fc85a-ee29-476d-8cc9-e5899d869d0b",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "5b42d44ecd5ac8c95f2c9ba42a7b1f166455728afdd7c729da06bc19d35b39d3"
+  },
+  "id": "hmr55N87DMaFNwec",
+  "tags": []
+}
